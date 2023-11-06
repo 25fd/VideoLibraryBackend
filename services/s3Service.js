@@ -24,7 +24,7 @@ exports.uploadFileToS3 = async (file) => {
     };
 
     const uploadResult = await s3.upload(params).promise();
-    // Return the S3 file URL
+    fs.unlinkSync(path);
     return uploadResult;
   } catch (error) {
     console.error('Error uploading file to S3:', error);
@@ -45,3 +45,19 @@ exports.deleteFileFromS3 = async (fileKey) => {
    console.log(error)
   }
 };
+
+exports.getSignedUrl = async (fileKey) => {
+  try {
+    const params = {
+      Bucket: process.env.S3_BUCKET_NAME,
+      Key: fileKey,
+      Expires: 60 * 60,
+    };
+
+    const url = await s3.getSignedUrlPromise('getObject', params);
+    return url;
+  } catch (error) {
+    console.error('Error getting signed url:', error);
+    throw error;
+  }
+}

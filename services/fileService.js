@@ -86,3 +86,23 @@ exports.getUserFiles = async (userId) => {
     throw error;
   }
 };
+
+exports.searchFiles = async (searchQuery) => {
+  try {
+    const files = await File.find({ name: { $regex: searchQuery, $options: 'i' } });
+    return files;
+  } catch (error) {
+    console.error('Error searching files:', error);
+    throw error;
+  }
+}
+
+exports.searchFilesBtTag = async (tagName) => {
+  try {
+    const files = await File.find({ tags: { $regex: tagName, $options: 'i' } });
+    return files;
+  } catch (error) {
+    console.error('Error searching files:', error);
+    throw error;
+  }
+}

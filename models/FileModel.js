@@ -31,8 +31,9 @@ const fileSchema = new mongoose.Schema({
   },
   isPublic: {
     type: Boolean,
-    default: false
-  }
+    default: false  
+  },
+  tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tag' }],
 });
 
 module.exports = mongoose.model('File', fileSchema);

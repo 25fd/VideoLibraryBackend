@@ -25,6 +25,7 @@ app.use(
 );
 
 app.use('/api/user', userRoutes);
+app.use('/api/file', require('./routes/files'));
 
 connectDB();
 
