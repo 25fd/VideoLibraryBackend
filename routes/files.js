@@ -13,4 +13,8 @@ router.post('/share/:fileId', authMiddleware.authenticateUser, fileController.sh
 
 router.get('/user-files', authMiddleware.authenticateUser, fileController.getUserFiles);
 
+router.post('/upload-thumbnail/:fileId', authMiddleware.authenticateUser, upload.single('file'), fileController.uploadThumbnail);
+
+router.put('/update/:fileId', authMiddleware.authenticateUser, fileController.updateFile);
+
 module.exports = router;

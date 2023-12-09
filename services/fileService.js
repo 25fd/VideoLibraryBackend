@@ -2,19 +2,37 @@ const File = require('../models/FileModel');
 const User = require('../models/UserModel');
 const s3Service = require('./s3Service'); 
 
-exports.uploadAndSaveFile = async (file, userId) => {
+exports.uploadAndSaveFile = async (file, metadata, userId) => {
   try {
     const { originalname, path } = file;
+    const { title, description, isPublic, tags } = metadata;
 
+    console.log(metadata);
     const { Location: fileUrl, Key: fileKey } = await s3Service.uploadFileToS3(file);
     const fileData = new File({
       name: originalname,
       owner: userId,
       url: fileUrl,
+      title,
+      description,
+      isPublic: isPublic === 'true',
+      tags: tags.split(','),
       fileKey,
     });
 
     await fileData.save();
+
+    return fileData;
+  } catch (error) {
+    console.error('Error uploading and saving file:', error);
+    throw error;
+  }
+};
+
+exports.uploadAndSaveThumbnail = async (thumbnail, fileId) => {
+  try {
+    const { Location: fileUrl, Key: fileKey } = await s3Service.uploadFileToS3(thumbnail);
+    const fileData = await File.findByIdAndUpdate(fileId, { thumbnailKey: fileKey }, { new: true } );
 
     return fileData;
   } catch (error) {
@@ -80,7 +98,9 @@ exports.getUserFiles = async (userId) => {
 
     const sharedFiles = await File.find( { 'permissions.user': userId });
 
-    return {ownedFiles, sharedFiles};
+    const publicFiles = await File.find({ isPublic: true });
+
+    return {ownedFiles, sharedFiles , publicFiles};
   } catch (error) {
     console.error('Error getting user files:', error);
     throw error;
@@ -103,6 +123,25 @@ exports.searchFilesBtTag = async (tagName) => {
     return files;
   } catch (error) {
     console.error('Error searching files:', error);
+    throw error;
+  }
+}
+
+exports.updateFile = async (fileId, title, description, isPublic, tags) => {
+  try {
+    const file = await File.findById(fileId);
+    if (!file) {
+      throw new Error('File not found');
+    }
+
+    if (title) file.title = title;
+    if (description) file.description = description;
+    if (tags && tags.length > 0) file.tags = tags;
+    file.isPublic = isPublic === 'true';
+
+    await file.save();
+  } catch (error) {
+    console.error('Error updating file:', error);
     throw error;
   }
 }

@@ -14,14 +14,19 @@ const storage = multer.diskStorage({
 
 
 const fileFilter = (req, file, cb) => {
-  const allowedFileTypes = /mp4|png/; 
+  let allowedFileTypes = /mp4/;
+  const allowdImage =  req.url.includes('/upload-thumbnail')
+  if (allowdImage) {
+    allowedFileTypes = /jpeg|jpg|png/;
+  }
   const ext = allowedFileTypes.test(path.extname(file.originalname).toLowerCase());
   const mimeType = allowedFileTypes.test(file.mimetype);
   console.log(ext, mimeType);
   if (ext && mimeType) {
     cb(null, true);
   } else {
-    cb(new Error('Only videos are allowed'));
+    const msg = allowdImage ? 'Only JPEG, PNG and JPG image are allowed ' : 'Only videos are allowed';
+    cb(new Error(msg));
   }
 };
 

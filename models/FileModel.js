@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const s3Service = require('../services/s3Service');
 
 const UserPermissionSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -11,6 +12,14 @@ const fileSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  title: {
+    type: String,
+    default: ''
+  },
+  description: {
+    type: String,
+    default: ''
+  },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -20,6 +29,10 @@ const fileSchema = new mongoose.Schema({
   url: {
     type: String, 
     required: true
+  },
+  thumbnailKey: {
+    type: String,
+    default: ''
   },
   fileKey: {
     type: String,
@@ -33,7 +46,27 @@ const fileSchema = new mongoose.Schema({
     type: Boolean,
     default: false  
   },
-  tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tag' }],
+  tags: [{ type: String }],
+});
+
+fileSchema.post('find', async function (file) {
+  if (!file) {
+    return;
+  }
+
+  if (Array.isArray(file)) {
+    for (let i = 0; i < file.length; i++) {
+      if (file[i].thumbnailKey) {
+        file[i].thumbnailUrl = await s3Service.getSignedUrl(file[i].thumbnailKey);
+      }
+      file[i].url = await s3Service.getSignedUrl(file[i].fileKey);
+    }
+  } else {
+    if (file.thumbnailKey) {
+      file.thumbnailUrl = await s3Service.getSignedUrl(file.thumbnailKey);
+    }
+    file.url = await s3Service.getSignedUrl(file.fileKey);
+  }
 });
 
 module.exports = mongoose.model('File', fileSchema);
