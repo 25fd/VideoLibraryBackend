@@ -24,6 +24,7 @@ exports.uploadFileToS3 = async (file) => {
     };
 
     const uploadResult = await s3.upload(params).promise();
+    console.log(path);
     fs.unlinkSync(path);
     return uploadResult;
   } catch (error) {
