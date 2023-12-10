@@ -137,7 +137,7 @@ exports.updateFile = async (fileId, title, description, isPublic, tags) => {
     if (title) file.title = title;
     if (description) file.description = description;
     if (tags && tags.length > 0) file.tags = tags;
-    file.isPublic = isPublic === 'true';
+    file.isPublic = typeof isPublic === 'string'? isPublic === 'true' : isPublic;
 
     await file.save();
   } catch (error) {
