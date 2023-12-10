@@ -34,6 +34,10 @@ const fileSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  thumbnailUrl: {
+    type: String,
+    default: ''
+  },
   fileKey: {
     type: String,
     required: true 
